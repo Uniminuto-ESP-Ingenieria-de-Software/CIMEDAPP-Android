@@ -3,10 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/list_pacientes_selector">
 
     <TextView
-        android:id="@+id/textViewPNombre"
+        android:id="@+id/textViewPPrincipal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="TextView"
@@ -14,12 +15,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textViewPIdentificacion"
+        android:id="@+id/textViewPSecundario"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"
         android:layout_marginTop="5dp"
         android:text="TextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewPNombre" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewPPrincipal" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

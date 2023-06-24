@@ -10,8 +10,7 @@ public class ModelPaciente implements Serializable {
     private String telefono;
     private String fechaNacimiento;
 
-    public ModelPaciente()
-    {
+    public ModelPaciente() {
     }
 
     public String getIdentificacion() {

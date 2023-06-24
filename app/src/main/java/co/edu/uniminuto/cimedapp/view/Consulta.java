@@ -1,8 +1,10 @@
-package co.edu.uniminuto.cimedapp;
+package co.edu.uniminuto.cimedapp.view;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import co.edu.uniminuto.cimedapp.R;
 
 public class Consulta extends AppCompatActivity {
 

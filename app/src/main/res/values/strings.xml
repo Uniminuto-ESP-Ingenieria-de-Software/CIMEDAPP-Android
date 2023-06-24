@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">CIMEDApp</string>
+    <string-array name="tipo">
+        <item>MÉDICO GENERAL</item>
+        <item>OPTOMETRÍA</item>
+        <item>ODONTOLOGÍA</item>
+        <item>ORTOPEDIA</item>
+        <item>NEUROLOGÍA</item>
+    </string-array>
+    <string-array name="medio">
+        <item>PRESENCIAL</item>
+        <item>TELEFÓNICO</item>
+        <item>VIDEO LLAMADA</item>
+    </string-array>
 </resources>

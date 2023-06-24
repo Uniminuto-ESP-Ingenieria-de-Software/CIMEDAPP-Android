@@ -4,13 +4,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.util.Scanner;
-
+/**
+ * Clase para el manejo de la conexión a la base de datos
+ */
 public class AdminConexion extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "cimed_database";
@@ -29,6 +25,10 @@ public class AdminConexion extends SQLiteOpenHelper {
     public static final String CITAS_COLUMN_FECHA = "fecha";
     public static final String CITAS_COLUMN_MEDIO = "medio";
 
+    /**
+     * Constructor que asigna el contexto.
+     * @param context Contexto desde el cual se ejecuta la conexión
+     */
     public AdminConexion(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }

@@ -1,19 +1,15 @@
 package co.edu.uniminuto.cimedapp.model;
 
-public class ModelCita {
+import java.io.Serializable;
+
+public class ModelCita implements Serializable {
     private int id;
     private String tipo;
     private String fecha;
     private String medio;
     private String idPaciente;
 
-    public ModelCita(int id, String tipo, String fecha, String medio, String idPaciente)
-    {
-        this.setId(id);
-        this.setTipo(tipo);
-        this.setFecha(fecha);
-        this.setMedio(medio);
-        this.setIdPaciente(idPaciente);
+    public ModelCita() {
     }
 
     public int getId() {
