@@ -2,9 +2,11 @@ package co.edu.uniminuto.cimedapp.view;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -29,6 +31,14 @@ public class Registro extends AppCompatActivity {
         setContentView(R.layout.activity_registro);
 
         inicializar();
+
+        editTextRDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePickerDialog(editTextRDate);
+            }
+        });
+
         buttonRRegistrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -45,7 +55,7 @@ public class Registro extends AppCompatActivity {
                         modelPaciente.setFechaNacimiento(editTextRDate.getText().toString().trim());
 
                         //Instanciar la clase de manejo de la persistencia y guardar la información en la base de datos
-                        PacienteDAO pacienteDAO = new PacienteDAO(Registro.this);
+                        PacienteDAO pacienteDAO = new PacienteDAO();
                         pacienteDAO.create(modelPaciente);
 
                         //Mensaje de confirmación del alamcenamiento de la información
@@ -81,6 +91,22 @@ public class Registro extends AppCompatActivity {
         editTextRTelefono = (EditText) findViewById(R.id.editTextRTelefono);
         editTextRDate = (EditText) findViewById(R.id.editTextRDate);
         buttonRRegistrar = (Button) findViewById(R.id.buttonRRegistrar);
+    }
+
+    private void showDatePickerDialog(final EditText editText) {
+        DatePickerFragment newFragment = DatePickerFragment.newInstance(new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                final String selectedDate = twoDigits(day) + "/" + twoDigits(month+1) + "/" + year;
+                editText.setText(selectedDate);
+            }
+        }, "PAST");
+
+        newFragment.show(getSupportFragmentManager(), "datePicker");
+    }
+
+    private String twoDigits(int n) {
+        return (n<=9) ? ("0"+n) : String.valueOf(n);
     }
 
     /**

@@ -1,19 +1,26 @@
 package co.edu.uniminuto.cimedapp.view;
 
-import android.database.Cursor;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TimePicker;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.List;
+
 import co.edu.uniminuto.cimedapp.R;
 import co.edu.uniminuto.cimedapp.model.CitaDAO;
 import co.edu.uniminuto.cimedapp.model.ModelCita;
+import co.edu.uniminuto.cimedapp.model.ModelPaciente;
 import co.edu.uniminuto.cimedapp.model.PacienteDAO;
 
 public class Asignacion extends AppCompatActivity {
@@ -22,6 +29,7 @@ public class Asignacion extends AppCompatActivity {
     private ListView listAPacientes;
     private Spinner spinnerATipo;
     private EditText editTextAFecha;
+    private EditText editTextAHora;
     private Spinner spinnerAMedio;
     private Button buttonAAsignar;
     private String mensaje="";
@@ -35,13 +43,14 @@ public class Asignacion extends AppCompatActivity {
         setContentView(R.layout.activity_asignacion);
 
         inicializar();
+
         buttonAFiltrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try {
                     //Peparar variables para la consulta en la base de datos
-                    PacienteDAO pacienteDAO = new PacienteDAO(Asignacion.this);
-                    Cursor resultados;
+                    PacienteDAO pacienteDAO = new PacienteDAO();
+                    List<ModelPaciente> resultados;
                     //Reiniciar variables
                     filaSeleccionada = -1;
                     idPacienteSeleccionado = "";
@@ -49,13 +58,13 @@ public class Asignacion extends AppCompatActivity {
                     if (editTextAFiltroId.getText().toString().trim().length() == 0) {
                         resultados = pacienteDAO.fetchAll();
                     } else {
-                        resultados = pacienteDAO.fetchById(editTextAFiltroId.getText().toString());
+                        resultados = pacienteDAO.filterById(editTextAFiltroId.getText().toString());
                     }
 
                     //Verificar si se obtuvieron resultados
-                    if(resultados.getCount() != 0) {
+                    if(resultados.size() != 0) {
                         //Preparar el adaptador para mostrar los resultados
-                        CustomCursorAdapter adapter = new CustomCursorAdapter(Asignacion.this,  R.layout.list_pacientes_layout, resultados, 0);
+                        CustomPacienteAdapter adapter = new CustomPacienteAdapter(Asignacion.this,  R.layout.list_pacientes_layout, resultados);
                         listAPacientes.setAdapter(adapter);
                         listAPacientes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             @Override
@@ -78,10 +87,10 @@ public class Asignacion extends AppCompatActivity {
                                 // Notificar al adaptador que los datos han cambiado para actualizar la vista
                                 adapter.notifyDataSetChanged();
 
-                                // Obtener el cursor de la fila seleccionada
-                                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                                // Obtener el elemento de la fila seleccionada
+                                ModelPaciente pacienteSeleccionado = (ModelPaciente) parent.getItemAtPosition(position);
                                 // Obtener la identificacion del paciente de la fila seleccionada
-                                idPacienteSeleccionado = cursor.getString(cursor.getColumnIndexOrThrow("_id"));
+                                idPacienteSeleccionado = pacienteSeleccionado.getIdentificacion();
                             }
                         });
                     } else {
@@ -96,6 +105,20 @@ public class Asignacion extends AppCompatActivity {
             }
         });
 
+        editTextAFecha.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePickerDialog(editTextAFecha);
+            }
+        });
+
+        editTextAHora.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTimePickerDialog(editTextAHora);
+            }
+        });
+
         buttonAAsignar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -106,16 +129,15 @@ public class Asignacion extends AppCompatActivity {
                         ModelCita modelCita = new ModelCita();
                         modelCita.setIdPaciente(idPacienteSeleccionado);
                         modelCita.setTipo(spinnerATipo.getSelectedItem().toString());
-                        modelCita.setFecha(editTextAFecha.getText().toString());
+                        modelCita.setFecha(editTextAFecha.getText().toString()+" "+editTextAHora.getText().toString());
                         modelCita.setMedio(spinnerATipo.getSelectedItem().toString());
 
-
                         //Instanciar la clase de manejo de la persistencia y guardar la información en la base de datos
-                        CitaDAO citaDAO = new CitaDAO(Asignacion.this);
+                        CitaDAO citaDAO = new CitaDAO();
                         citaDAO.create(modelCita);
 
                         //Mensaje de confirmación del alamcenamiento de la información
-                        Toast.makeText(Asignacion.this, "REGISTRO CREADO CON ÉXITO", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Asignacion.this, "CITA ASIGNADA CON ÉXITO", Toast.LENGTH_SHORT).show();
 
                         //Limpiar los campos del formulario para prepararlos para un nuevo registro.
                         editTextAFiltroId.setText("");
@@ -124,6 +146,7 @@ public class Asignacion extends AppCompatActivity {
                         idPacienteSeleccionado="";
                         spinnerATipo.setSelection(0);
                         editTextAFecha.setText("");
+                        editTextAHora.setText("");
                         spinnerAMedio.setSelection(0);
                     } catch (Exception exc) {
                         //Mostrar mensaje informando el error de ejecución.
@@ -145,15 +168,54 @@ public class Asignacion extends AppCompatActivity {
         buttonAFiltrar = (Button) findViewById(R.id.buttonAFiltrar);
         listAPacientes = (ListView) findViewById(R.id.listAPacientes);
         spinnerATipo = (Spinner) findViewById(R.id.spinnerATipo);
-        ArrayAdapter<CharSequence >adapterTipo = ArrayAdapter.createFromResource(Asignacion.this, R.array.tipo, android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence>adapterTipo = ArrayAdapter.createFromResource(Asignacion.this, R.array.tipo, android.R.layout.simple_spinner_item);
         adapterTipo.setDropDownViewResource(android.R.layout.simple_spinner_item);
         spinnerATipo.setAdapter(adapterTipo);
         editTextAFecha= (EditText) findViewById(R.id.editTextAFecha);
+        editTextAHora= (EditText) findViewById(R.id.editTextAHora);
         spinnerAMedio = (Spinner) findViewById(R.id.spinnerAMedio);
-        ArrayAdapter<CharSequence >adapterMedio = ArrayAdapter.createFromResource(Asignacion.this, R.array.medio, android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence>adapterMedio = ArrayAdapter.createFromResource(Asignacion.this, R.array.medio, android.R.layout.simple_spinner_item);
         adapterMedio.setDropDownViewResource(android.R.layout.simple_spinner_item);
         spinnerAMedio.setAdapter(adapterMedio);
         buttonAAsignar = (Button) findViewById(R.id.buttonAAsignar);
+    }
+
+    private void showDatePickerDialog(final EditText editText) {
+        DatePickerFragment newFragment = DatePickerFragment.newInstance(new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                final String selectedDate = twoDigits(day) + "/" + twoDigits(month+1) + "/" + year;
+                editText.setText(selectedDate);
+            }
+        }, "FUTURE");
+
+        newFragment.show(getSupportFragmentManager(), "datePicker");
+    }
+
+    private void showTimePickerDialog(final EditText editText) {
+        TimePickerFragment newFragment = TimePickerFragment.newInstance(new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, int hour, int min) {
+                String complemento="AM";
+                if(hour>12) {
+                    complemento="PM";
+                }
+                final String selectedTime = twoDigits(hour>12?hour-12:hour) + ":" + twoDigits(min)+" "+complemento;
+
+                if(hour<8 || hour>=18) {
+                    editText.setText("");
+                    Toast.makeText(Asignacion.this, "El horario debe ser entre las 8:00 AM y las 6:00 PM", Toast.LENGTH_SHORT).show();
+                } else {
+                    editText.setText(selectedTime);
+                }
+            }
+        });
+
+        newFragment.show(getSupportFragmentManager(), "timePicker");
+    }
+
+    private String twoDigits(int n) {
+        return (n<=9) ? ("0"+n) : String.valueOf(n);
     }
 
     /**
@@ -167,7 +229,7 @@ public class Asignacion extends AppCompatActivity {
             mensaje += "Debe seleccionar un paciente.\n";
             valido = false;
         }
-        if (spinnerATipo.getSelectedItem().toString().length() == 0) {
+        if (spinnerATipo.getSelectedItem().toString().length() == 0 || spinnerATipo.getSelectedItem().toString().matches("Seleccione tipo...")) {
             mensaje += "El campo Tipo es obligatorio.\n";
             valido = false;
         }
@@ -177,7 +239,12 @@ public class Asignacion extends AppCompatActivity {
             valido = false;
         }
 
-        if (spinnerAMedio.getSelectedItem().toString().length() == 0) {
+        if (editTextAHora.getText().toString().trim().length() == 0) {
+            mensaje += "El campo Hora es obligatorio.\n";
+            valido = false;
+        }
+
+        if (spinnerAMedio.getSelectedItem().toString().length() == 0 || spinnerAMedio.getSelectedItem().toString().matches("Seleccione medio...")) {
             mensaje += "El campo Apellidos es obligatorio.\n";
             valido = false;
         }

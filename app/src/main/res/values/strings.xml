@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">CIMEDApp</string>
     <string-array name="tipo">
+        <item>Seleccione tipo...</item>
         <item>MÉDICO GENERAL</item>
         <item>OPTOMETRÍA</item>
         <item>ODONTOLOGÍA</item>
@@ -8,6 +9,7 @@
         <item>NEUROLOGÍA</item>
     </string-array>
     <string-array name="medio">
+        <item>Seleccione medio...</item>
         <item>PRESENCIAL</item>
         <item>TELEFÓNICO</item>
         <item>VIDEO LLAMADA</item>
